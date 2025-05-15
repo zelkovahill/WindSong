@@ -9,11 +9,13 @@ public class PlayerStateMachine : MonoBehaviour
 
     public PlayerIdleState PlayerIdleState { get; private set; }
     public PlayerMoveState PlayerMoveState { get; private set; }
+    public PlayerAttackState PlayerAttackState { get; private set; }
 
     private void Awake()
     {
         PlayerIdleState = new PlayerIdleState(this);
         PlayerMoveState = new PlayerMoveState(this);
+        PlayerAttackState = new PlayerAttackState(this);
     }
 
     public void Start()

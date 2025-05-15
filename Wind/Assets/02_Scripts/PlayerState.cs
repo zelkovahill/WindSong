@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -55,6 +56,11 @@ public class PlayerIdleState : PlayerState
         {
             _playerStateMachine.TransitionState(_playerStateMachine.PlayerMoveState);
         }
+
+        if (_playerInput.IsAttacking)
+        {
+            _playerStateMachine.TransitionState(_playerStateMachine.PlayerAttackState);
+        }
     }
 }
 
@@ -92,5 +98,68 @@ public class PlayerMoveState : PlayerState
             _playerStateMachine.TransitionState(_playerStateMachine.PlayerIdleState);
         }
 
+        if (_playerInput.IsAttacking)
+        {
+            _playerStateMachine.TransitionState(_playerStateMachine.PlayerAttackState);
+        }
+    }
+}
+
+public class PlayerAttackState : PlayerState
+{
+    private float _attackDuration = 0.2f;
+    private float _attackTimer = 0f;
+
+    public PlayerAttackState(PlayerStateMachine playerStateMachine) : base(playerStateMachine) { }
+
+    public override void Enter()
+    {
+        _attackTimer = 0f;
+        _playerAnimation.SetAttackAnimation(true);
+    }
+
+    public override void FixedUpdate()
+    {
+
+    }
+
+    public override void Update()
+    {
+        _attackTimer += Time.deltaTime;
+
+        if (_playerInput.MoveInput != Vector3.zero)
+        {
+            _playerAnimation.SetMoveAnimation(true);
+            _playerMovement.Move(_playerInput.MoveInput);
+            _playerMovement.Rotate(_playerInput.MoveInput);
+        }
+        else
+        {
+            _playerAnimation.SetMoveAnimation(false);
+            _playerMovement.Move(Vector3.zero);
+            _playerMovement.Rotate(Vector3.zero);
+        }
+
+        Transition();
+    }
+
+    public override void Exit()
+    {
+        _attackTimer = 0f;
+        _playerAnimation.SetMoveAnimation(false);
+        _playerAnimation.SetAttackAnimation(false);
+    }
+
+    public override void Transition()
+    {
+        if (_attackTimer >= _attackDuration)
+        {
+            _playerStateMachine.TransitionState(_playerStateMachine.PlayerIdleState);
+        }
+
+        if (_playerInput.MoveInput != Vector3.zero)
+        {
+            _playerStateMachine.TransitionState(_playerStateMachine.PlayerMoveState);
+        }
     }
 }
